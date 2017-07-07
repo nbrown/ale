@@ -105,20 +105,27 @@ endfunction
 " patterns, using matchlist().
 "
 " Only the first pattern which matches a line will be returned.
-function! ale#util#GetMatches(lines, patterns) abort
+function! ale#util#GetMatches(lines, patterns, ...) abort
+    let l:return_line_num = a:0 > 0
     let l:matches = []
     let l:lines = type(a:lines) == type([]) ? a:lines : [a:lines]
     let l:patterns = type(a:patterns) == type([]) ? a:patterns : [a:patterns]
+    let l:line_count = 0
 
     for l:line in l:lines
         for l:pattern in l:patterns
             let l:match = matchlist(l:line, l:pattern)
 
             if !empty(l:match)
-                call add(l:matches, l:match)
+                if l:return_line_num
+                    call add(l:matches, [l:match, l:line_count])
+                else
+                    call add(l:matches, l:match)
+                endif
                 break
             endif
         endfor
+        let l:line_count +=1
     endfor
 
     return l:matches
